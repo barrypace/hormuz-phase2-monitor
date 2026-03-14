@@ -1,0 +1,53 @@
+{
+  "fred": {
+    "base_url": "https://api.stlouisfed.org/fred/series/observations",
+    "series": {
+      "brent": "DCOILBRENTEU",
+      "wti": "DCOILWTICO",
+      "gasoline": "GASREGW"
+    }
+  },
+  "rss": {
+    "shipping_feeds": [
+      "https://feeds.reuters.com/reuters/worldNews",
+      "https://www.maritime-executive.com/rss"
+    ],
+    "geopolitical_feeds": [
+      "https://www.state.gov/briefings-statements/feed/",
+      "https://www.whitehouse.gov/briefing-room/statements-releases/feed/",
+      "https://www.gov.uk/government/organisations/foreign-commonwealth-development-office.atom"
+    ],
+    "shipping_keywords": [
+      "hormuz",
+      "tanker",
+      "shipping disruption",
+      "maritime warning",
+      "insurance spike",
+      "convoy",
+      "naval escort"
+    ],
+    "geopolitical_keywords": [
+      "hormuz",
+      "iran",
+      "strait",
+      "military",
+      "sanctions",
+      "naval",
+      "escalation"
+    ]
+  },
+  "thresholds": {
+    "brent_price_alert": 120,
+    "weekly_change_alert": 0.15,
+    "sustained_trend_days": 3,
+    "keyword_match_alert": 3,
+    "score_elevated_threshold": 2
+  },
+  "operations": {
+    "notification_cooldown_minutes": 60
+  },
+  "output": {
+    "snapshot_path": "data/latest_snapshot.json",
+    "previous_snapshot_path": "data/previous_snapshot.json"
+  }
+}
