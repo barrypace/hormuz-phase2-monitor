@@ -19,14 +19,6 @@ class Article:
     summary: str
 
 
-@dataclass
-class FeedFetchResult:
-    feed_url: str
-    success: bool
-    article_count: int
-    error: str = ""
-
-
 class HTTPClient:
     """Small GET-only client with JSON and text helpers."""
 
@@ -46,6 +38,7 @@ def _parse_rss_or_atom(xml_text: str) -> List[Article]:
     root = ElementTree.fromstring(xml_text)
     articles: List[Article] = []
 
+    # RSS style
     for item in root.findall(".//item"):
         articles.append(
             Article(
@@ -56,6 +49,7 @@ def _parse_rss_or_atom(xml_text: str) -> List[Article]:
             )
         )
 
+    # Atom style
     ns = {"atom": "http://www.w3.org/2005/Atom"}
     for entry in root.findall(".//atom:entry", ns):
         link = ""
@@ -91,18 +85,12 @@ def fetch_fred_series(base_url: str, api_key: str, series_id: str, days: int = 1
     return [row for row in observations if row.get("value") not in (".", None)]
 
 
-def fetch_rss_feed_status(feed_url: str) -> tuple[List[Article], FeedFetchResult]:
+def fetch_rss_articles(feed_url: str) -> List[Article]:
     try:
         xml_text = HTTPClient.get_text(feed_url)
-        articles = _parse_rss_or_atom(xml_text)
-        return articles, FeedFetchResult(feed_url=feed_url, success=True, article_count=len(articles))
-    except Exception as exc:
-        return [], FeedFetchResult(feed_url=feed_url, success=False, article_count=0, error=str(exc))
-
-
-def fetch_rss_articles(feed_url: str) -> List[Article]:
-    articles, _ = fetch_rss_feed_status(feed_url)
-    return articles
+        return _parse_rss_or_atom(xml_text)
+    except Exception:
+        return []
 
 
 def keyword_mentions(articles: List[Article], keywords: List[str]) -> List[Article]:

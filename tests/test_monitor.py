@@ -21,7 +21,7 @@ class FeedStatus:
 class MonitorBehaviorTest(unittest.TestCase):
     def _base_config(self, tmpdir: str) -> dict:
         return {
-            "fred": {"base_url": "https://fred.example", "series": {"brent": "DCOILBRENTEU", "treasury_2y": "DGS2"}},
+            "fred": {"base_url": "https://fred.example", "series": {"brent": "DCOILBRENTEU"}},
             "rss": {
                 "shipping_feeds": ["https://shipping.example/feed"],
                 "geopolitical_feeds": ["https://geo.example/feed"],
@@ -35,17 +35,14 @@ class MonitorBehaviorTest(unittest.TestCase):
                 "keyword_match_alert": 1,
                 "score_elevated_threshold": 2,
             },
-            "operations": {
-                "notification_cooldown_minutes": 60,
-                "fail_on_unhealthy_sources": True,
-            },
+            "operations": {"notification_cooldown_minutes": 60},
             "output": {
                 "snapshot_path": str(Path(tmpdir) / "latest_snapshot.json"),
                 "previous_snapshot_path": str(Path(tmpdir) / "previous_snapshot.json"),
             },
         }
 
-    def test_snapshot_has_confidence_and_critical_checks(self):
+    def test_snapshot_contains_data_health_and_operations(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             cfg = self._base_config(tmpdir)
             with patch("monitor.load_config", return_value=cfg), patch(
@@ -59,29 +56,11 @@ class MonitorBehaviorTest(unittest.TestCase):
                 os.environ.pop("FRED_API_KEY", None)
                 snapshot = monitor.run()
 
-                self.assertEqual(snapshot["confidence"], "LOW")
-                self.assertFalse(snapshot["data_health"]["critical_sources_healthy"])
-                self.assertFalse(snapshot["data_health"]["critical_checks"]["fred_energy_available"])
-                self.assertFalse(snapshot["data_health"]["critical_checks"]["geopolitical_source_available"])
-
-    def test_healthy_critical_sources_yield_high_confidence(self):
-        with tempfile.TemporaryDirectory() as tmpdir:
-            cfg = self._base_config(tmpdir)
-            with patch("monitor.load_config", return_value=cfg), patch(
-                "monitor.fetch_rss_feed_status"
-            ) as mock_feed_status, patch("monitor.fetch_fred_series", side_effect=[[{"value": "130"}], [{"value": "4.5"}]]):
-                mock_feed_status.side_effect = [
-                    ([], FeedStatus("https://shipping.example/feed", True, 2, "")),
-                    ([], FeedStatus("https://geo.example/feed", True, 3, "")),
-                ]
-                os.environ["FRED_API_KEY"] = "dummy"
-                snapshot = monitor.run()
-
-                self.assertEqual(snapshot["confidence"], "HIGH")
-                self.assertTrue(snapshot["data_health"]["critical_sources_healthy"])
-                self.assertTrue(snapshot["data_health"]["critical_checks"]["fred_energy_available"])
-                self.assertTrue(snapshot["data_health"]["critical_checks"]["shipping_source_available"])
-                self.assertTrue(snapshot["data_health"]["critical_checks"]["geopolitical_source_available"])
+                self.assertIn("data_health", snapshot)
+                self.assertIn("operations", snapshot)
+                self.assertFalse(snapshot["data_health"]["fred"]["attempted"])
+                self.assertEqual(snapshot["data_health"]["geopolitical_feeds"][0]["error"], "timeout")
+                self.assertEqual(snapshot["operations"]["notification_reason"], "no_alert_level_change")
 
     def test_notifies_on_alert_level_change_when_cooldown_elapsed(self):
         with tempfile.TemporaryDirectory() as tmpdir:

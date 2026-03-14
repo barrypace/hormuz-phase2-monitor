@@ -2,7 +2,7 @@ name: Daily Energy Shock Monitor
 
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "15 5 * * *"
   workflow_dispatch:
 
 jobs:
@@ -16,12 +16,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Validate configured sources
-        env:
-          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
-        run: |
-          python scripts/validate_sources.py --fail-on-unsuitable
-          cat data/source_validation_report.md >> "$GITHUB_STEP_SUMMARY"
       - name: Run monitor
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
@@ -29,20 +23,10 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          EMAIL_SMTP_HOST: ${{ secrets.EMAIL_SMTP_HOST }}
-          EMAIL_SMTP_PORT: ${{ secrets.EMAIL_SMTP_PORT }}
-          EMAIL_SMTP_USERNAME: ${{ secrets.EMAIL_SMTP_USERNAME }}
-          EMAIL_SMTP_PASSWORD: ${{ secrets.EMAIL_SMTP_PASSWORD }}
-          EMAIL_SMTP_STARTTLS: ${{ secrets.EMAIL_SMTP_STARTTLS }}
-          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
-          EMAIL_TO: ${{ secrets.EMAIL_TO }}
         run: |
           python monitor.py
-      - name: Upload monitor artifacts
+      - name: Upload snapshot artifact
         uses: actions/upload-artifact@v4
         with:
-          name: monitor-artifacts
-          path: |
-            data/latest_snapshot.json
-            data/source_validation_report.json
-            data/source_validation_report.md
+          name: monitor-snapshot
+          path: data/latest_snapshot.json

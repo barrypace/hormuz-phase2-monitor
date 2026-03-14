@@ -4,16 +4,19 @@
     "series": {
       "brent": "DCOILBRENTEU",
       "wti": "DCOILWTICO",
-      "gasoline": "GASREGW",
-      "treasury_2y": "DGS2"
+      "gasoline": "GASREGW"
     }
   },
   "rss": {
     "shipping_feeds": [
-      "https://news.google.com/rss/search?q=strait+of+hormuz+shipping",
-      "https://news.google.com/rss/search?q=tanker+disruption"
+      "https://feeds.reuters.com/reuters/worldNews",
+      "https://www.maritime-executive.com/rss"
     ],
-    "geopolitical_feeds": [],
+    "geopolitical_feeds": [
+      "https://www.state.gov/briefings-statements/feed/",
+      "https://www.whitehouse.gov/briefing-room/statements-releases/feed/",
+      "https://www.gov.uk/government/organisations/foreign-commonwealth-development-office.atom"
+    ],
     "shipping_keywords": [
       "hormuz",
       "tanker",
@@ -39,10 +42,6 @@
     "sustained_trend_days": 3,
     "keyword_match_alert": 3,
     "score_elevated_threshold": 2
-  },
-  "operations": {
-    "notification_cooldown_minutes": 60,
-    "fail_on_unhealthy_sources": true
   },
   "output": {
     "snapshot_path": "data/latest_snapshot.json",
