@@ -2,7 +2,7 @@ name: Daily Energy Shock Monitor
 
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "15 5 * * *"
   workflow_dispatch:
 
 jobs:
@@ -23,13 +23,6 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          EMAIL_SMTP_HOST: ${{ secrets.EMAIL_SMTP_HOST }}
-          EMAIL_SMTP_PORT: ${{ secrets.EMAIL_SMTP_PORT }}
-          EMAIL_SMTP_USERNAME: ${{ secrets.EMAIL_SMTP_USERNAME }}
-          EMAIL_SMTP_PASSWORD: ${{ secrets.EMAIL_SMTP_PASSWORD }}
-          EMAIL_SMTP_STARTTLS: ${{ secrets.EMAIL_SMTP_STARTTLS }}
-          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
-          EMAIL_TO: ${{ secrets.EMAIL_TO }}
         run: |
           python monitor.py
       - name: Upload snapshot artifact

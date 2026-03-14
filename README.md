@@ -25,15 +25,17 @@ Alert levels:
 
 - `data/fetch_data.py` - HTTP GET, FRED fetch, RSS/Atom parsing
 - `analysis/scoring.py` - threshold evaluation, score and alert-level logic
-- `alerts/notifier.py` - Telegram + GitHub issue + SMTP email notifications
-- `monitor.py` - orchestration entrypoint and snapshot generation
-- `.github/workflows/daily-monitor.yml` - GitHub Actions scheduled execution
-- `tests/` - tests for parsing, scoring, and monitor behavior
-- `config.json` - configurable thresholds, feed lists, and operations settings
+- `alerts/notifier.py` - Telegram + GitHub issue notifications
+- `monitor.py` - orchestration entrypoint and daily snapshot generation
+- `.github/workflows/daily-monitor.yml` - GitHub Actions daily execution
+- `tests/` - basic tests for parsing and scoring
+- `config.json` - all configurable thresholds and feed lists
 
 ## Configuration
 
-All thresholds, feeds, and operational controls are in `config.json`.
+All thresholds and feeds are in `config.json`.
+
+Example keys:
 
 ```json
 "thresholds": {
@@ -42,9 +44,6 @@ All thresholds, feeds, and operational controls are in `config.json`.
   "sustained_trend_days": 3,
   "keyword_match_alert": 3,
   "score_elevated_threshold": 2
-},
-"operations": {
-  "notification_cooldown_minutes": 60
 }
 ```
 
@@ -53,14 +52,8 @@ All thresholds, feeds, and operational controls are in `config.json`.
 Store sensitive values in GitHub Secrets:
 
 - `FRED_API_KEY` (required for energy data)
-- `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` (optional)
-- `EMAIL_SMTP_HOST`
-- `EMAIL_SMTP_PORT`
-- `EMAIL_SMTP_USERNAME`
-- `EMAIL_SMTP_PASSWORD`
-- `EMAIL_SMTP_STARTTLS` (`true`/`false`, optional; default true)
-- `EMAIL_FROM`
-- `EMAIL_TO`
+- `TELEGRAM_BOT_TOKEN` (optional)
+- `TELEGRAM_CHAT_ID` (optional)
 
 The built-in `GITHUB_TOKEN` is used for issue creation notifications.
 
@@ -72,20 +65,14 @@ python monitor.py
 ```
 
 Output:
-- Prints natural-language summary
-- Writes `data/latest_snapshot.json` (including `data_health` and `operations` blocks)
-- Maintains `data/previous_snapshot.json` for alert-level change detection and cooldown tracking
+- Prints daily natural-language summary
+- Writes `data/latest_snapshot.json`
+- Maintains `data/previous_snapshot.json` for alert-level change detection
 
-## GitHub Actions schedule
+## GitHub Actions
 
-Workflow runs every **10 minutes** (`*/10 * * * *`) and can also be triggered manually (`workflow_dispatch`).
+Workflow runs daily and can also be triggered manually (`workflow_dispatch`).
 It uploads the latest JSON snapshot as an artifact.
-
-## Notification behavior
-
-- Notifications are sent only when alert level changes.
-- Notification channels: Telegram, GitHub issue, SMTP email (when configured).
-- Cooldown suppresses repeated notifications when configured (`operations.notification_cooldown_minutes`).
 
 ## Add new indicators
 

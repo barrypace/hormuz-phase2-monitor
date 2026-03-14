@@ -43,9 +43,6 @@
     "keyword_match_alert": 3,
     "score_elevated_threshold": 2
   },
-  "operations": {
-    "notification_cooldown_minutes": 60
-  },
   "output": {
     "snapshot_path": "data/latest_snapshot.json",
     "previous_snapshot_path": "data/previous_snapshot.json"
